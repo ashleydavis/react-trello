@@ -26,7 +26,8 @@ class Lane extends Component {
     const node = evt.target
     const elemScrollPosition = node.scrollHeight - node.scrollTop - node.clientHeight
     const {onLaneScroll} = this.props
-    if (elemScrollPosition <= 0 && onLaneScroll && !this.state.loading) {
+    // In some browsers and/or screen sizes a decimal rest value between 0 and 1 exists, so it should be checked on < 1 instead of < 0
+    if (elemScrollPosition < 1 && onLaneScroll && !this.state.loading) {
       const {currentPage} = this.state
       this.setState({loading: true})
       const nextPage = currentPage + 1
@@ -142,7 +143,7 @@ class Lane extends Component {
   }
 
   updateCard = updatedCard => {
-    this.props.actions.updateCard({laneId: this.props.id, updatedCard})
+    this.props.actions.updateCard({laneId: this.props.id, card: updatedCard})
     this.props.onCardUpdate(this.props.id, updatedCard)
   }
 
@@ -206,7 +207,7 @@ class Lane extends Component {
           getChildPayload={index => this.props.getCardDetails(id, index)}>
           {cardList}
         </Container>
-        {editable && !addCardMode && <components.AddCardLink onClick={this.showEditableCard} t={t} />}
+        {editable && !addCardMode && <components.AddCardLink onClick={this.showEditableCard} t={t} laneId={id} />}
         {addCardMode && (
           <components.NewCardForm onCancel={this.hideEditableCard} t={t} laneId={id} onAdd={this.addNewCard} />
         )}
@@ -225,7 +226,7 @@ class Lane extends Component {
     this.props.onLaneUpdate(this.props.id, {title: value})
   }
 
-  renderHeader = (pickedProps) => {
+  renderHeader = pickedProps => {
     const {components} = this.props
     return (
       <components.LaneHeader
